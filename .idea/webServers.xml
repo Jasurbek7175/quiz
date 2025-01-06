@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="59274662-ef69-4ce1-a640-b5a7ea54ba8d" name="172.16.1.4" url="">
+        <fileTransfer rootFolder="/var/www/html/quiz" accessType="SFTP" host="172.16.1.4" port="22" sshConfigId="9a74ec3e-592d-4508-b8bd-fac2565db4ae" sshConfig="adm1n@172.16.1.4:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
