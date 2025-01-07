@@ -56,8 +56,8 @@ class Category(models.Model):
     objects = CategoryManager()
 
     class Meta:
-        verbose_name = ("Category")
-        verbose_name_plural = ("Categories")
+        verbose_name = ("Категория")
+        verbose_name_plural = ("Категории")
 
     def __str__(self):
         return self.category
@@ -69,6 +69,9 @@ class SubCategory(models.Model):
                                     max_length=250, blank=True,
                                     unique=True, null=True)
 
+    class Meta:
+        verbose_name = "Подкатегория"
+        verbose_name_plural = "Подкатегории"
     def __str__(self):
         return self.sub_category
 
@@ -166,8 +169,8 @@ class Quiz(models.Model):
         super(Quiz, self).save(force_insert, force_update, *args, **kwargs)
 
     class Meta:
-        verbose_name = ("Quiz")
-        verbose_name_plural = ("Quizzes")
+        verbose_name = ("Викторина")
+        verbose_name_plural = ("Викторины")
 
     def __str__(self):
         return self.title
@@ -283,8 +286,8 @@ class Question(models.Model):
     objects = InheritanceManager()
 
     class Meta:
-        verbose_name = ("Question")
-        verbose_name_plural = ("Questions")
+        verbose_name = ("Вопрос")
+        verbose_name_plural = ("Вопросы")
         ordering = ['category']
 
     def __str__(self):
@@ -304,5 +307,5 @@ class Answer(models.Model):
         return self.content
 
     class Meta:
-        verbose_name = "Answer"
-        verbose_name_plural = "Answers"
+        verbose_name = "Ответ"
+        verbose_name_plural = "Ответы"

@@ -1,9 +1,11 @@
 from django.shortcuts import render
-
 # Create your views here.
 from rest_framework.generics import CreateAPIView
 from django.contrib.auth import get_user_model
-from .serializers import CreateUserSerializer, CategoryQuizSerializer
+from .serializers import CreateUserSerializer, CategoryQuizSerializer, CategorySerializer, SubCategorySerializer, \
+    QuestionSerializer
+from .models import Category, Question
+from rest_framework.generics import ListAPIView
 
 User = get_user_model()
 
@@ -23,11 +25,6 @@ class QuizDetailView(RetrieveAPIView):
     serializer_class = QuizSerializer
 
 
-from rest_framework.generics import ListAPIView
-from .models import Category
-from .serializers import CategorySerializer
-
-
 class QuizListView(ListAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
@@ -38,9 +35,9 @@ class CategoryListView(ListAPIView):
     serializer_class = CategorySerializer
 
 
-from rest_framework.generics import ListAPIView
-from .models import Question
-from .serializers import QuestionSerializer
+class SubCategoryListView(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = SubCategorySerializer
 
 
 class QuestionListView(ListAPIView):

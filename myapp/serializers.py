@@ -40,9 +40,17 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
+    category_name = serializers.SerializerMethodField()
     class Meta:
         model = SubCategory
-        fields = ['id', 'category', 'sub_category']
+        fields = ['id', 'category', 'sub_category', ]
+
+    def get_category_name(self, obj):
+        category_name = Category.objects.filter(category=obj.category).first()
+        return {
+            "id": category_name.id,
+            "category": category_name.category
+        } if category_name else None
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -89,7 +97,6 @@ class QuizSerializer(serializers.ModelSerializer):
                   'questions', 'time']
 
     def get_questions(self, obj):
-        # Use the reverse relationship to fetch questions associated with the quiz
         questions = Question.objects.filter(quiz=obj)
         max_questions = obj.max_questions
         if obj.random_order:
@@ -100,7 +107,10 @@ class QuizSerializer(serializers.ModelSerializer):
 
     def get_sub_category(self, obj):
         sub_category = SubCategory.objects.filter(sub_category=obj.sub_category).first()
-        return sub_category.id if sub_category else None
+        return {
+            "id": sub_category.id,
+            "name": sub_category.sub_category
+        } if sub_category else None
 
 
 class QuizListSerializer(serializers.ModelSerializer):
