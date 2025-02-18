@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="card-title text-danger">Delete Question</h1>
+            <p class="card-text">Are you sure you want to delete the following question?</p>
+
+            <div class="mb-4">
+                <p><strong>Question:</strong> {{ question.content }}</p>
+                <p><strong>Category:</strong> {{ question.category }}</p>
+            </div>
+
+            <form method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, delete this question</button>
+            </form>
+            <a href="{% url 'question_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

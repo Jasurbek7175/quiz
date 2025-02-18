@@ -70,22 +70,32 @@ class QuestionSerializer(serializers.ModelSerializer):
         answers = obj.answer.all()
         return AnswerSerializer(answers, many=True).data
 
+    def create(self, validated_data):
+        answers_data = validated_data.get('answers', [])
+        category = validated_data.get('category')
+        question = Question.objects.create(**validated_data)
+        for answer_data in answers_data:
+            Answer.objects.create(question=question, **answer_data)
+        # for category in category:
+        #     Answer(question=question, **category)
+        return question
 
-# class QuizSerializer(serializers.ModelSerializer):
-#     questions = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Quiz
-#         fields = ['id', 'title', 'random_order', 'max_questions', 'exam_paper', 'category_id', 'questions', 'time']
-#
-#     def get_questions(self, obj):
-#         questions = obj.questions.all()
-#         max_questions = obj.max_questions
-#         if obj.random_order:
-#             questions = questions.order_by('?')[:max_questions]
-#         elif max_questions:
-#             questions = questions[:max_questions]
-#         return QuestionSerializer(questions, many=True).data
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers')
+        instance.quiz.set(validated_data.get('quiz', instance.quiz.all()))
+        instance.category = validated_data.get('category', instance.category)
+        instance.figure = validated_data.get('figure', instance.figure)
+        instance.content = validated_data.get('content', instance.content)
+        instance.explanation = validated_data.get('explanation', instance.explanation)
+        instance.save()
+
+        # Update answers
+        instance.answer.all().delete()  # Clear existing answers
+        for answer_data in answers_data:
+            Answer.objects.create(question=instance, **answer_data)
+
+        return instance
+
 
 class QuizSerializer(serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()

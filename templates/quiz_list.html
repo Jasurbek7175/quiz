@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <h1 class="my-4">Quiz List</h1>
+        <a href="{% url 'quiz_create' %}" class="btn btn-primary mb-3">Create Quiz</a>
+        <a href="{% url 'question_list' %}" class="btn btn-primary mb-3">Back to question list</a>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for quiz in quizzes %}
+                <tr>
+                    <td>{{ quiz.title }}</td>
+                    <td>{{ quiz.description }}</td>
+                    <td>
+                        <a href="{% url 'quiz_update' quiz.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'quiz_delete' quiz.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">{{ title }}</h1>
+
+        <form method="POST" enctype="multipart/form-data" class="p-4 border rounded bg-light shadow-sm">
+            {% csrf_token %}
+
+            <h2 class="mb-3">Question</h2>
+            {#        <div class="mb-3">#}
+            {#            {{ question_form.as_p }}#}
+            {#        </div>#}
+            {#            <div class="m-3 pt-5 pb-5 pr-5">#}
+            {#                <label for="quiz" class="form-label">Select Quizzes:</label>#}
+            {#                <div>#}
+            {#                    {{ question_form.quiz }}#}
+            {#                </div>#}
+            {#            </div>#}
+
+            <div class="form-check">
+                {% for checkbox in question_form.quiz %}
+                    <div class="form-check mb-2">
+                        {{ checkbox }}
+                        <label class="form-check-label">{{ checkbox.label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+
+
+            <div class="mb-3">
+                <label for="category" class="form-label">Choose Category:</label>
+                {{ question_form.category }}
+            </div>
+
+
+            <div class="mb-3">
+                <label for="figure" class="form-label">Upload Figure (optional):</label>
+                {{ question_form.figure }}
+            </div>
+
+
+            <div class="mb-3">
+                <label for="explanation" class="form-label">Question:</label>
+                {{ question_form.content }}
+            </div>
+
+
+            <div class="mb-3">
+                <label for="explanation" class="form-label">Explanation (optional):</label>
+                {{ question_form.explanation }}
+            </div>
+
+            <h2 class="mb-3">Answers</h2>
+            <div id="answers-container" class="row g-3">
+                {% for answer in existing_answers %}
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" name="content[]" class="form-control" placeholder="Enter answer text"
+                                   value="{{ answer.content }}" required>
+                            <div class="input-group-text">
+                                <input type="checkbox" name="correct[]" value="{{ answer.id }}"
+                                       {% if answer.correct %}checked{% endif %}>
+                            </div>
+                            <label class="ms-2">Correct</label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Save Question and Answers</button>
+            <a href="{% url 'question_list' %}" class="btn btn-secondary mt-4">Back Question List</a>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

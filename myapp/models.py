@@ -72,6 +72,7 @@ class SubCategory(models.Model):
     class Meta:
         verbose_name = "Подкатегория"
         verbose_name_plural = "Подкатегории"
+
     def __str__(self):
         return self.sub_category
 
@@ -80,16 +81,6 @@ class Quiz(models.Model):
     title = models.CharField(
         verbose_name=("Title"),
         max_length=60, blank=False
-    )
-    description = models.TextField(
-        verbose_name=("Description"),
-        blank=True, help_text=("a description of the quiz")
-    )
-
-    url = models.SlugField(
-        max_length=60, blank=False,
-        help_text=("a user friendly url"),
-        verbose_name=("user friendly url")
     )
 
     category = models.ForeignKey(
@@ -113,22 +104,12 @@ class Quiz(models.Model):
         help_text=("Number of questions to be answered on each attempt.")
     )
 
-    answers_at_end = models.BooleanField(
-        blank=False, default=False,
-        help_text=("Correct answer is NOT shown after question. Answers displayed at the end."),
-        verbose_name=("Answers at end")
-    )
     exam_paper = models.BooleanField(
         blank=False, default=False,
         help_text=("If yes, the result of each attempt by a user will be stored. Necessary for marking."),
         verbose_name=("Exam Paper")
     )
 
-    single_attempt = models.BooleanField(
-        blank=False, default=False,
-        help_text=("If yes, only one attempt by a user will be permitted. Non users cannot sit this exam."),
-        verbose_name=("Single Attempt")
-    )
     pass_mark = models.SmallIntegerField(
         blank=True, default=0,
         verbose_name=("Pass Mark"),
@@ -136,37 +117,20 @@ class Quiz(models.Model):
         validators=[MaxValueValidator(100)]
     )
 
-    success_text = models.TextField(
-        blank=True, help_text=("Displayed if user passes."),
-        verbose_name=("Success Text")
-    )
-
-    fail_text = models.TextField(
-        verbose_name=("Fail Text"),
-        blank=True, help_text=("Displayed if user fails.")
-    )
-
-    draft = models.BooleanField(
-        blank=True, default=False,
-        verbose_name=("Draft"),
-        help_text=(
-            "If yes, the quiz is not displayed in the quiz list and can only be taken by users who can edit quizzes.")
-    )
-
     time = models.IntegerField(null=True, verbose_name=("Time"), help_text=("Time for quiz"))
 
-    def save(self, force_insert=False, force_update=False, *args, **kwargs):
-        self.url = re.sub('\s+', '-', self.url).lower()
-
-        self.url = ''.join(letter for letter in self.url if letter.isalnum() or letter == '-')
-
-        if self.single_attempt is True:
-            self.exam_paper = True
-
-        if self.pass_mark > 100:
-            raise ValidationError('%s is above 100' % self.pass_mark)
-
-        super(Quiz, self).save(force_insert, force_update, *args, **kwargs)
+    # def save(self, force_insert=False, force_update=False, *args, **kwargs):
+    #     self.url = re.sub('\s+', '-', self.url).lower()
+    #
+    #     self.url = ''.join(letter for letter in self.url if letter.isalnum() or letter == '-')
+    #
+    #     if self.single_attempt is True:
+    #         self.exam_paper = True
+    #
+    #     if self.pass_mark > 100:
+    #         raise ValidationError('%s is above 100' % self.pass_mark)
+    #
+    #     super(Quiz, self).save(force_insert, force_update, *args, **kwargs)
 
     class Meta:
         verbose_name = ("Викторина")
@@ -175,96 +139,8 @@ class Quiz(models.Model):
     def __str__(self):
         return self.title
 
-    def get_questions(self):
-        return self.question_set.all().select_subclasses()
-
-    @property
-    def get_max_score(self):
-        return self.get_questions().count()
-
-    def anon_score_id(self):
-        return str(self.id) + "_score"
-
-    def anon_q_list(self):
-        return str(self.id) + "_q_list"
-
-    def anon_q_data(self):
-        return str(self.id) + "_data"
-
-
-class ProgressManager(models.Manager):
-
-    def new_progress(self, user):
-        new_progress = self.create(user=user, score="")
-        new_progress.save()
-        return new_progress
-
-
-class Progress(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name=("User"), on_delete=models.CASCADE)
-
-    score = models.CharField(validators=[validate_comma_separated_integer_list], max_length=1024,
-                             verbose_name=("Score"))
-
-    correct_answer = models.CharField(max_length=10, verbose_name=('Correct Answers'))
-
-    wrong_answer = models.CharField(max_length=10, verbose_name=('Wrong Answers'))
-
-    objects = ProgressManager()
-
-    class Meta:
-        verbose_name = ("User Progress")
-        verbose_name_plural = ("User progress records")
-
-
-class SittingManager(models.Manager):
-
-    def new_sitting(self, user, quiz):
-        if quiz.random_order is True:
-            question_set = quiz.question_set.all().select_subclasses().order_by('?')
-        else:
-            question_set = quiz.question_set.all().select_subclasses()
-
-        question_set = [item.id for item in question_set]
-
-        if len(question_set) == 0:
-            raise ImproperlyConfigured('Question set of the quiz is empty. Please configure questions properly')
-
-        if quiz.max_questions and quiz.max_questions < len(question_set):
-            question_set = question_set[:quiz.max_questions]
-
-        questions = ",".join(map(str, question_set)) + ","
-
-        new_sitting = self.create(user=user, quiz=quiz, question_order=questions, question_list=questions,
-                                  incorrect_questions="", current_score=0, complete=False, user_answers='{}')
-        return new_sitting
-
-
-class Sitting(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=("User"), on_delete=models.CASCADE)
-
-    quiz = models.ForeignKey(Quiz, verbose_name=("Quiz"), on_delete=models.CASCADE)
-
-    question_order = models.CharField(validators=[validate_comma_separated_integer_list], max_length=1024,
-                                      verbose_name=("Question Order"))
-
-    question_list = models.CharField(validators=[validate_comma_separated_integer_list], max_length=1024,
-                                     verbose_name=("Question List"))
-
-    incorrect_questions = models.CharField(validators=[validate_comma_separated_integer_list], max_length=1024,
-                                           blank=True, verbose_name=("Incorrect questions"))
-
-    current_score = models.IntegerField(verbose_name=("Current Score"))
-
-    complete = models.BooleanField(default=False, blank=False, verbose_name=("Complete"))
-
-    user_answers = models.TextField(blank=True, default='{}', verbose_name=("User Answers"))
-
-    start = models.DateTimeField(auto_now_add=True, verbose_name=("Start"))
-
-    end = models.DateTimeField(null=True, blank=True, verbose_name=("End"))
-
-    objects = SittingManager()
+    # def get_questions(self):
+    #     return self.question_set.all().select_subclasses()
 
 
 class Question(models.Model):
